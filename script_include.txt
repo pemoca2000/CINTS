@@ -1,0 +1,190 @@
+(function executeRule(current, previous /*null when async*/) {
+
+    // Run only when the trigger field transitions from empty -> populated
+    var triggerField = 'u_sm_trigger_field'; // <-- CHANGE THIS
+    if (!current[triggerField] || (previous && previous[triggerField])) {
+        return;
+    }
+
+    // Avoid re-processing if handles already exist (optional but strongly recommended)
+    // Change field names below to your actual handle fields on the case table.
+    if (current.u_sm_case_handle || current.u_sm_position_handle) {
+        return;
+    }
+
+    // Kick off integration (show sync first; you can easily make it async later)
+    new x_g_cfm_vas.SMIntegration().createPersonPositionCaseFromCase(current);
+
+})(current, previous);
+
+
+
+
+
+var SMIntegration = Class.create();
+SMIntegration.prototype = {
+    initialize: function () {},
+
+    /**
+     * caseGR is a GlideRecord from x_g_cfm_vas_case (current in BR)
+     */
+    createPersonPositionCaseFromCase: function (caseGR) {
+        // 1) Get Applicant
+        var applicantGR = this._getApplicant(caseGR);
+
+        // 2) Build SOAP call
+        var soap = new sn_ws.SOAPMessageV2(
+            'x_g_cfm_vas.VAS SM Outbound',          // <-- your SOAP Message record name
+            'SmsStdCreatePersParmCase'             // <-- your SOAP Message Function
+        );
+
+        // If you *must* set SOAP header auth fields (as in your earlier BR prototype),
+        // read from sys_properties; do NOT hardcode.
+        // soap.setStringParameterNoEscape('AuthHeader.UserName', gs.getProperty('x_g_cfm_vas.sm.username'));
+        // soap.setStringParameterNoEscape('AuthHeader.Password', gs.getProperty('x_g_cfm_vas.sm.password'));
+
+        // 3) Map + set parameters
+        var payload = this._buildCreatePayload(caseGR, applicantGR);
+        this._applyParams(soap, payload);
+
+        // 4) Execute
+        var response = soap.execute();
+        var status = response.getStatusCode();
+        var body = response.getBody();
+
+        if (status < 200 || status > 299) {
+            this._logFailure(caseGR, status, body);
+            return { ok: false, httpStatus: status, body: body };
+        }
+
+        // 5) Parse handles from response XML
+        var handles = this._parseHandles(body);
+
+        // Basic validation
+        if (!handles.personHandle || !handles.positionHandle || !handles.caseHandle) {
+            gs.error('[SMIntegration] SOAP succeeded but missing one or more handles. case=' + caseGR.getUniqueValue());
+            gs.error('[SMIntegration] Response body: ' + body);
+            return { ok: false, httpStatus: status, body: body, handles: handles };
+        }
+
+        // 6) Persist handles
+        this._writeHandles(caseGR, applicantGR, handles);
+
+        gs.info('[SMIntegration] Created in SM. case=' + caseGR.getUniqueValue()
+            + ' personHandle=' + handles.personHandle
+            + ' positionHandle=' + handles.positionHandle
+            + ' caseHandle=' + handles.caseHandle);
+
+        return { ok: true, httpStatus: status, handles: handles };
+    },
+
+    _getApplicant: function (caseGR) {
+        // CHANGE: case field that references applicant
+        if (!caseGR.u_applicant) {
+            throw '[SMIntegration] Case missing applicant reference (u_applicant).';
+        }
+
+        var a = new GlideRecord('x_g_cfm_vas_applicant');
+        if (!a.get(caseGR.u_applicant)) {
+            throw '[SMIntegration] Applicant not found: ' + caseGR.u_applicant;
+        }
+        return a;
+    },
+
+    _buildCreatePayload: function (caseGR, applicantGR) {
+        // Put ALL mismatched mapping here (SOAP param -> SN field/value).
+        // Add translation maps here too (tier_1 -> T1, etc).
+        // NOTE: Replace examples with your real field names.
+
+        var investigationBasisMap = {
+            'tier_1': 'T1',
+            'tier_2': 'T2',
+            'tier_3': 'T3'
+        };
+        function translate(map, v) {
+            if (!v) return '';
+            return map[v] || v;
+        }
+
+        return {
+            // Case params
+            'CaseParams.caseStatus': (caseGR.case_status + ''),
+            'CaseParams.dateApplicantSignature': (caseGR.date_of_applicants_signature + ''),
+            'CaseParams.investigationBasisRequested': translate(investigationBasisMap, caseGR.investigation_basis_requested + ''),
+
+            // Position params
+            'PositionParams.positionSensitivity': (caseGR.position_sensitivity + ''),
+            'PositionParams.positionTitle': (caseGR.position_title + ''),
+            'PositionParams.employeeType': 'CONTRACTOR',
+            'PositionParams.employeeStatus': 'active',
+
+            // Contract info
+            'contractInfo.contractorName': (caseGR.contractor_company + ''),
+            'contractInfo.activeStatus': 'Active',
+
+            // Person params (from Applicant table)
+            'PersonParams.firstName': (applicantGR.first_name + ''),
+            'PersonParams.middleName': (applicantGR.middle_name + ''),
+            'PersonParams.lastName': (applicantGR.last_name + ''),
+            'PersonParams.email': (applicantGR.email + ''),
+            'PersonParams.birthDate': (applicantGR.birth_date + ''),
+            'PersonParams.ssn': (applicantGR.ssn + ''),
+            'PersonParams.isSsnNotAvailable': ((!!applicantGR.ssn_not_available) + '')
+        };
+    },
+
+    _applyParams: function (soapMsg, payloadObj) {
+        for (var key in payloadObj) {
+            if (payloadObj.hasOwnProperty(key)) {
+                soapMsg.setStringParameterNoEscape(key, payloadObj[key]);
+            }
+        }
+    },
+
+    _parseHandles: function (responseXml) {
+        // Response structure reference:
+        // PersonResponse/personHandle, PositionResponse/positionHandle, CaseResponse/caseHandle :contentReference[oaicite:2]{index=2}
+
+        var out = { personHandle: '', positionHandle: '', caseHandle: '' };
+
+        var xml = new XMLDocument2();
+        xml.parseXML(responseXml);
+
+        // Use local-name() so namespaces won't break XPath.
+        out.personHandle = (xml.getNodeText("//*[local-name()='PersonResponse']/*[local-name()='personHandle']") || '').trim();
+        out.positionHandle = (xml.getNodeText("//*[local-name()='PositionResponse']/*[local-name()='positionHandle']") || '').trim();
+        out.caseHandle = (xml.getNodeText("//*[local-name()='CaseResponse']/*[local-name()='caseHandle']") || '').trim();
+
+        return out;
+    },
+
+    _writeHandles: function (caseGR, applicantGR, handles) {
+        // CHANGE THESE FIELD NAMES to match your tables:
+
+        // Applicant gets person handle
+        applicantGR.u_sm_person_handle = handles.personHandle;
+        applicantGR.update();
+
+        // Case gets position + case handles
+        // Prevent recursion / BR re-entry (best practice)
+        caseGR.setWorkflow(false);
+
+        caseGR.u_sm_position_handle = handles.positionHandle;
+        caseGR.u_sm_case_handle = handles.caseHandle;
+
+        caseGR.update();
+    },
+
+    _logFailure: function (caseGR, status, body) {
+        gs.error('[SMIntegration] SM create failed. HTTP ' + status + ' case=' + caseGR.getUniqueValue());
+        gs.error('[SMIntegration] Response: ' + body);
+
+        // Optional: store on record or integration log table
+        // Be careful storing huge XML in fields.
+        // caseGR.setWorkflow(false);
+        // caseGR.u_sm_last_error = 'HTTP ' + status;
+        // caseGR.update();
+    },
+
+    type: 'SMIntegration'
+};
