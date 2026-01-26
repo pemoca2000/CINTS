@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <soap:Header>
+        <StatusHeader xmlns="http://centechgroup.com/SMX/SmsLink">
+            <Authorized>Yes</Authorized>
+        </StatusHeader>
+    </soap:Header>
+    <soap:Body>
+        <SmsStdCreateResponse xmlns="http://centechgroup.com/SMX/SmsLink">
+            <SmsStdCreateResult successCount="1" failCount="0">
+                <UpdateList xmlns="">
+                    <PersonResponse>
+                        <personHandle>0052600023</personHandle>
+                        <alreadyExists>No</alreadyExists>
+                        <returnCode>OK</returnCode>
+                    </PersonResponse>
+                    <PositionResponse>
+                        <positionHandle>0052600023-CMS01</positionHandle>
+                        <returnCode>OK</returnCode>
+                        <alreadyExists>NO</alreadyExists>
+                    </PositionResponse>
+                    <CaseResponse>
+                        <caseHandle>0052600023-CMS01-CDCSUC001</caseHandle>
+                        <returnCode>OK</returnCode>
+                        <alreadyExists>No</alreadyExists>
+                        <caseIssues />
+                    </CaseResponse>
+                </UpdateList>
+            </SmsStdCreateResult>
+        </SmsStdCreateResponse>
+    </soap:Body>
+</soap:Envelope>
