@@ -1,0 +1,62 @@
+
+
+/**********     CHOICES ON VAS CASE FIELDS NEED TO BE CONVERTED TO CHOICES EXPECTED BY SECURITY MANAGER       **********/
+/********** FOR EXAMPLE Investigation Basis Requested HAS tier_1 choice value but we PROBABLY need to send T1 **********/
+
+(function executeRule(current, previous /*null when async*/) {
+
+	try { 
+ var s = new sn_ws.SOAPMessageV2('x_g_cfm_vas.VAS SM Outbound', 'SmsStdCreatePersParmCase');
+
+//override authentication profile 
+//authentication type ='basic'
+//s.setAuthenticationProfile(authentication type,profile sysid);
+
+//set a MID server name if one wants to run the message on MID
+//s.setMIDServer('MY_MID_SERVER');
+
+//if the message is configured to communicate through ECC queue, either
+//by setting a MID server or calling executeAsync, one needs to set skip_sensor
+//to true. Otherwise, one may get an intermittent error that the response body is null
+//s.setEccParameter('skip_sensor', true);
+
+ s.setStringParameterNoEscape('CaseParams.caseStatus', current.case_status);
+ s.setStringParameterNoEscape('PositionParams.positionSensitivity', current.position_sensitivity);
+ s.setStringParameterNoEscape('CaseParams.dateApplicantSignature', current.date_of_applicants_signature);
+ s.setStringParameterNoEscape('contractInfo.contractorName', current.contractor_company);
+ s.setStringParameterNoEscape('contractInfo.activeStatus', 'Active');
+ s.setStringParameterNoEscape('CaseParams.investigationBasisRequested', ''); //choice values format not what SM expects
+ s.setStringParameterNoEscape('PersonParams.email', 'msimms1234@example.com');
+ s.setStringParameterNoEscape('PositionParams.employeeType', 'CONTRACTOR');
+ s.setStringParameterNoEscape('PersonParams.lastName', 'Simms');
+ s.setStringParameterNoEscape('PersonParams.birthCity', 'Hacketstown');
+ s.setStringParameterNoEscape('PositionParams.organization', 'CMS');
+ s.setStringParameterNoEscape('CaseParams.datePaperworkReceived', '');
+ s.setStringParameterNoEscape('CaseParams.casePriorityLevel', '');
+ s.setStringParameterNoEscape('PersonParams.citizenshipCountry', 'US');
+ s.setStringParameterNoEscape('PersonParams.birthDate', '2000-01-01');
+ s.setStringParameterNoEscape('CaseParams.pivRequested', '');
+ s.setStringParameterNoEscape('CaseParams.caseType', '');
+ s.setStringParameterNoEscape('CaseParams.requestingUserEmail', '');
+ s.setStringParameterNoEscape('PersonParams.isSsnNotAvailable', 'false');
+ s.setStringParameterNoEscape('AuthHeader.UserName', 'Pokemon');
+ s.setStringParameterNoEscape('contractInfo.contractNumber', '75FCMC24C0023::');
+ s.setStringParameterNoEscape('PersonParams.birthState', 'PA');
+ s.setStringParameterNoEscape('PersonParams.firstName', 'Martin');
+ s.setStringParameterNoEscape('PersonParams.birthCountry', 'US');
+ s.setStringParameterNoEscape('PositionParams.positionTitle', 'Manager II');
+ s.setStringParameterNoEscape('PersonParams.middleName', 'James');
+ s.setStringParameterNoEscape('PositionParams.employeeStatus', 'active');
+ s.setStringParameterNoEscape('contractInfo.contractEndDate', '2026-10-30');
+ s.setStringParameterNoEscape('AuthHeader.Password', 'Password1');
+ s.setStringParameterNoEscape('contractInfo.contractStartDate', '2025-05-01');
+ s.setStringParameterNoEscape('PersonParams.ssn', '883759001');
+ var response = s.execute();
+ var responseBody = response.getBody(); 
+ var status = response.getStatusCode();
+}
+catch(ex) { 
+ var message = ex.message;
+}
+
+})(current, previous);
