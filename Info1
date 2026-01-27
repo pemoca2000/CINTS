@@ -1,4 +1,7 @@
-//servicenow generated script from SmsStdCreatePersParmCase soap function with hardcoded values that work
+//servicenow generated script from SmsStdCreatePersParmCase soap function with hardcoded values that worked when tested
+//these parameters will need to be dynamically populated from values on the case and applicant records
+//also as mentioned before, the field names do not match the parameter names so will need to have a mapping function to handle this
+//note - contractInfo is part of PositionParams
  try { 
  var s = new sn_ws.SOAPMessageV2('x_g_cfm_vas.VAS SM Outbound', 'SmsStdCreatePersParmCase');
  //override authentication profile 
@@ -327,9 +330,15 @@ catch(ex) {
 </xml>
 
 
+In the business rule, current is now the applicant table and the trigger is hhs_id changes and hhs_id is not empty.
+The fields to populate from the response payload are:
+sm_person_handle on applicant record
+sm_case_handle on case record
+sm_position_handle on case record
 
-
-
-
-
+//basic authentication credentials stored on the sys_auth_profile_basic table on my servicenow instance
+//we can use these instead of hardcoding in the payload
+the record "name" is "VAS SM Dev Basic Auth Creds"
+username is "Pokeman"
+unencrypted password is "Password1"
 
