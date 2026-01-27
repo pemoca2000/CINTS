@@ -3,34 +3,20 @@
     // ============================================================
     // PURPOSE
     // ------------------------------------------------------------
-    // Trigger: Applicant.hhs_id transitions from empty -> populated.
-    // Action: Call Script Include to create Person/Position/Case in SM
-    //         via SmsStdCreatePersParmCase SOAP function.
+    // Applicant BR: When hhs_id goes from empty -> populated,
+    // call Script Include to create Person/Position/Case in SM.
     // ============================================================
 
-    // --- Safety check: only run if hhs_id is populated now ---
-    if (!current.hhs_id) {
-        return;
-    }
+    // Only run if hhs_id is populated now
+    if (!current.hhs_id) return;
 
-    // --- Trigger rule: run ONLY when hhs_id changes from empty -> value ---
-    // previous may be null in async scenarios; for normal after-update BR it exists.
-    if (previous && previous.hhs_id && (previous.hhs_id.toString() === current.hhs_id.toString())) {
-        // hhs_id didn't change
-        return;
-    }
-    if (previous && previous.hhs_id) {
-        // hhs_id was already populated before; you said you want "when empty field is populated"
-        return;
-    }
+    // Run only on transition: empty -> populated
+    if (previous && previous.hhs_id) return; // was already populated before
 
-    // --- Optional: if we already have a person handle, skip to avoid duplicates ---
-    // (You can remove this if you want re-sends.)
-    if (current.sm_person_handle) {
-        return;
-    }
+    // Optional: avoid duplicate create if person handle already exists
+    if (current.sm_person_handle) return;
 
-    // Call Script Include to do the real work
-    new x_g_cfm_vas.SMIntegration().createPersonPositionCaseFromApplicant(current);
+    // Call existing Script Include (VASUtil)
+    new x_g_cfm_vas.VASUtil().createPersonPositionCaseFromApplicant(current);
 
 })(current, previous);
