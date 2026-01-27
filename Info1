@@ -1,0 +1,335 @@
+//servicenow generated script from SmsStdCreatePersParmCase soap function with hardcoded values that work
+ try { 
+ var s = new sn_ws.SOAPMessageV2('x_g_cfm_vas.VAS SM Outbound', 'SmsStdCreatePersParmCase');
+ //override authentication profile 
+ //authentication type ='basic'
+ //s.setAuthenticationProfile(authentication type,profile sysid);
+
+ s.setStringParameterNoEscape('AuthHeader.UserName', 'Pokemon');
+ s.setStringParameterNoEscape('AuthHeader.Password', 'Password1');
+
+ s.setStringParameterNoEscape('CaseParams.caseStatus', 'OPEN');
+ s.setStringParameterNoEscape('PositionParams.positionSensitivity', '5');
+ s.setStringParameterNoEscape('CaseParams.dateApplicantSignature', '2025-09-12');
+ s.setStringParameterNoEscape('contractInfo.contractorName', 'Deloitte');
+ s.setStringParameterNoEscape('contractInfo.activeStatus', 'Active');
+ s.setStringParameterNoEscape('CaseParams.investigationBasisRequested', 'T1');
+ s.setStringParameterNoEscape('PersonParams.email', 'msimms1234@example.com');
+ s.setStringParameterNoEscape('PositionParams.employeeType', 'CONTRACTOR');
+ s.setStringParameterNoEscape('PersonParams.lastName', 'Simms');
+ s.setStringParameterNoEscape('PersonParams.birthCity', 'Hacketstown');
+ s.setStringParameterNoEscape('PositionParams.organization', 'CMS');
+ s.setStringParameterNoEscape('CaseParams.datePaperworkReceived', '2025-09-20');
+ s.setStringParameterNoEscape('CaseParams.casePriorityLevel', 'None');
+ s.setStringParameterNoEscape('PersonParams.citizenshipCountry', 'US');
+ s.setStringParameterNoEscape('PersonParams.birthDate', '2000-01-01');
+ s.setStringParameterNoEscape('CaseParams.pivRequested', 'Yes');
+ s.setStringParameterNoEscape('CaseParams.caseType', 'Suitability');
+ s.setStringParameterNoEscape('CaseParams.requestingUserEmail', 'john.jinkleheimer@example.com');
+ s.setStringParameterNoEscape('PersonParams.isSsnNotAvailable', 'false');
+ s.setStringParameterNoEscape('contractInfo.contractNumber', '75FCMC24C0023::');
+ s.setStringParameterNoEscape('PersonParams.birthState', 'PA');
+ s.setStringParameterNoEscape('PersonParams.firstName', 'Martin');
+ s.setStringParameterNoEscape('PersonParams.birthCountry', 'US');
+ s.setStringParameterNoEscape('PositionParams.positionTitle', 'Manager II');
+ s.setStringParameterNoEscape('PersonParams.middleName', 'James');
+ s.setStringParameterNoEscape('PositionParams.employeeStatus', 'active');
+ s.setStringParameterNoEscape('contractInfo.contractEndDate', '2026-10-30');
+ s.setStringParameterNoEscape('AuthHeader.Password', 'Password1');
+ s.setStringParameterNoEscape('contractInfo.contractStartDate', '2025-05-01');
+ s.setStringParameterNoEscape('PersonParams.ssn', '883759001');
+ var response = s.execute();
+ var responseBody = response.getBody(); 
+ var status = response.getStatusCode();
+}
+catch(ex) { 
+ var message = ex.message;
+}
+
+
+//Sample Case record xml so you see field names
+<xml>
+<x_g_cfm_vas_case>
+<acms_application_id/>
+<acms_context_id/>
+<acms_created_on/>
+<action_status/>
+<active>true</active>
+<activity_due/>
+<additional_assignee_list/>
+<adjudication>favorable</adjudication>
+<adjudication_date/>
+<agile_story/>
+<applicant/>
+<approval>not requested</approval>
+<approval_history/>
+<approval_set/>
+<archival_copy/>
+<assigned_to/>
+<assignment_group/>
+<background_investigation_adjudication_status/>
+<badge_requested/>
+<business_duration/>
+<business_service/>
+<calendar_duration/>
+<case_email_address/>
+<case_status/>
+<cer_other/>
+<cerb_chr_decision_complete/>
+<cerb_result/>
+<cerb_review_decision/>
+<cerb_status/>
+<close_notes/>
+<closed_at/>
+<closed_by/>
+<cmdb_ci/>
+<cmdb_ci_business_app/>
+<comments/>
+<comments_and_work_notes/>
+<company/>
+<complete_mandatory_fields_description/>
+<contact_type>phone</contact_type>
+<contract/>
+<contract_end_date>2027-01-01</contract_end_date>
+<contract_name/>
+<contract_start_date>2025-12-29</contract_start_date>
+<contract_to/>
+<contractor_company>Galactic Survey Corps</contractor_company>
+<cor/>
+<cor_approval_date/>
+<cor_email/>
+<cor_hhs_id/>
+<cor_phone_number/>
+<corrections_needed/>
+<correlation_display/>
+<correlation_id/>
+<credential_type/>
+<date_eapp_completed/>
+<date_eapp_due/>
+<date_eapp_released/>
+<date_eapp_requested/>
+<date_name_check/>
+<date_name_check_requesed/>
+<date_of_applicants_signature>2026-01-12</date_of_applicants_signature>
+<date_of_investigation_prior_clearance/>
+<date_received/>
+<date_sent_provider/>
+<days_until_eapp_expired/>
+<dco_case_time/>
+<dcsa_case_number/>
+<delivery_plan/>
+<delivery_task/>
+<description/>
+<dps_case_time/>
+<drug_referral_return_review_complete/>
+<due_date/>
+<eapp_chr_decision_complete/>
+<eapp_decision/>
+<eapp_request_id/>
+<eapp_status>under_review</eapp_status>
+<eapp_suitability_decision_complete/>
+<edited/>
+<employee_type>employee</employee_type>
+<escalation>0</escalation>
+<eua_id/>
+<expected_start/>
+<federal_eapp_review_decision/>
+<fingerprint_adjudication_date/>
+<fingerprint_appointment>false</fingerprint_appointment>
+<fingerprint_enrollment_date/>
+<fingerprint_received_date/>
+<fingerprint_request_date/>
+<fingerprint_resubmission_date/>
+<fingerprint_review_decision/>
+<fingerprint_status>cleared</fingerprint_status>
+<first_fingerprint_result/>
+<follow_up/>
+<fp_chr_decision_complete/>
+<group_list/>
+<ict_created_on/>
+<ict_date_approved/>
+<ict_position_id/>
+<ict_rejection/>
+<ict_request_type/>
+<ict_revoked_status/>
+<ict_submit_date/>
+<impact>3</impact>
+<initiation_team_poc/>
+<intake_team_poc/>
+<investigation_basis/>
+<investigation_basis_requested>tier_4</investigation_basis_requested>
+<investigation_number/>
+<investigation_provider/>
+<investigation_results_edelivery_date/>
+<issue_description/>
+<knowledge>false</knowledge>
+<legal_first_name>Diamond</legal_first_name>
+<legal_last_name>Pearl</legal_last_name>
+<location/>
+<logical_access>false</logical_access>
+<made_sla>true</made_sla>
+<method_of_submission/>
+<mitigating_comments/>
+<name_check_determination/>
+<nbis_clearance_eligibility/>
+<needs_attention>false</needs_attention>
+<number>CAS0001001</number>
+<opened_at>2026-01-23 15:28:18</opened_at>
+<opened_by display_value="Karim Hussien">ee5a11061bfc22108e5ecbb6624bcb9e</opened_by>
+<opm_issue_code/>
+<order/>
+<osflo_review_decision>reject</osflo_review_decision>
+<parent/>
+<physical_access_to_ashburn/>
+<pips_check_decision/>
+<position_sensitivity/>
+<position_title>Trainer</position_title>
+<pricing_fiscal_year/>
+<prior_investigation_number/>
+<priority>4</priority>
+<rap_back_enrollment_date/>
+<reassignment_count>0</reassignment_count>
+<rejection>3</rejection>
+<rejection_goto/>
+<rejection_reason/>
+<rejection_reasons/>
+<rel/>
+<release_to_dcsa/>
+<requestor_name/>
+<return_review_reason/>
+<review_team_poc/>
+<route_reason/>
+<sac_report/>
+<second_date_sent_provider/>
+<second_fingerprint_result/>
+<second_fingerprint_review_decision/>
+<second_fingerprint_reviewed/>
+<security_guidelines/>
+<sentiment/>
+<service_code/>
+<service_offering/>
+<sf_date_received/>
+<sf_date_submitted/>
+<short_description/>
+<skills/>
+<sla_due/>
+<sm_case_handle/>
+<sm_position_handle/>
+<sn_esign_document/>
+<sn_esign_esignature_configuration/>
+<soi/>
+<son/>
+<source_issue_identified/>
+<state>1</state>
+<status/>
+<subject_current_eligibility_determination/>
+<submitted_form/>
+<suitability_consideration/>
+<suitability_decision/>
+<suitability_factor/>
+<sys_class_name>x_g_cfm_vas_case</sys_class_name>
+<sys_created_by>karim.hussien.local</sys_created_by>
+<sys_created_on>2026-01-23 15:29:47</sys_created_on>
+<sys_domain>global</sys_domain>
+<sys_domain_path>/</sys_domain_path>
+<sys_id>3436e0b21ba67a108e5ecbb6624bcb3a</sys_id>
+<sys_mod_count>24</sys_mod_count>
+<sys_updated_by>karim.hussien.local</sys_updated_by>
+<sys_updated_on>2026-01-26 15:05:10</sys_updated_on>
+<task_effective_number>CAS0001001</task_effective_number>
+<tier1_cerb_chr/>
+<tier1_dr_decision/>
+<tier1_eapp_chr_decision/>
+<tier1_fp_chr_decision/>
+<tier1_rec_min_piv_termination_decision/>
+<tier2_cerb_chr/>
+<tier2_dr_decision/>
+<tier2_eapp_chr_decision/>
+<tier2_fp_chr_decision/>
+<tier2_rec_min_piv_termination_decision/>
+<tier3_cerb_chr/>
+<tier3_dr_decision/>
+<tier3_eapp_chr_decision/>
+<tier3_fp_chr_decision/>
+<tier3_rec_min_piv_termination_decision/>
+<tier_1_eapp_suitability_decision/>
+<tier_2_eapp_suitability_decision/>
+<tier_3_eapp_suitability_decision/>
+<time_worked/>
+<u_at_location_from_date/>
+<u_at_location_until_date/>
+<u_eua_component/>
+<u_eua_department/>
+<u_eua_region/>
+<u_last_end_user_response/>
+<u_number_of_attachments>0</u_number_of_attachments>
+<u_rpt_time/>
+<u_third_party_record/>
+<universal_request/>
+<upload_eapp/>
+<upload_pips_document/>
+<upn/>
+<upon_approval>proceed</upon_approval>
+<upon_reject>cancel</upon_reject>
+<urgency>3</urgency>
+<user_input/>
+<user_uuid/>
+<variables/>
+<watch_list/>
+<wf_activity/>
+<work_end/>
+<work_notes/>
+<work_notes_list/>
+<work_start/>
+<work_status/>
+</x_g_cfm_vas_case>
+</xml>
+
+
+//Sample applicant record xml so you see field names
+<xml>
+<x_g_cfm_vas_applicant>
+<agency_email>hoennIsBest@cms.hhs.gov</agency_email>
+<applicant_name>Ruby Sapphire</applicant_name>
+<birth_city/>
+<birth_country/>
+<birth_state/>
+<citizenship_country/>
+<cms_region/>
+<contract_end_date/>
+<contract_start_date/>
+<employee_status>active</employee_status>
+<eua_id/>
+<eua_status>active</eua_status>
+<hhs_id>20030504</hhs_id>
+<home_address>Littleroot Town</home_address>
+<is_us_citizen>false</is_us_citizen>
+<legal_first_name>Ruby</legal_first_name>
+<legal_last_name>Sapphire</legal_last_name>
+<middle_name>Emerald</middle_name>
+<mobile_phone>904-203-0405</mobile_phone>
+<office_address>Professor Birch's Office</office_address>
+<personal_address>rubysapphire@emerald.com</personal_address>
+<piv_termination_reason/>
+<rap_back_enrollment_date>2025-12-01</rap_back_enrollment_date>
+<sm_person_handle/>
+<suspend_card_until/>
+<sys_created_by>karim.hussien.local</sys_created_by>
+<sys_created_on>2025-12-17 19:10:39</sys_created_on>
+<sys_id>2ce5f27a87b1b2507a342136cebb3524</sys_id>
+<sys_mod_count>3</sys_mod_count>
+<sys_updated_by>karim.hussien.local</sys_updated_by>
+<sys_updated_on>2026-01-23 19:51:02</sys_updated_on>
+<upn/>
+<user_uuid/>
+<work_email/>
+</x_g_cfm_vas_applicant>
+</xml>
+
+
+
+
+
+
+
+
