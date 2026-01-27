@@ -1,0 +1,58 @@
+var VASUtil = Class.create();
+VASUtil.prototype = {
+    initialize: function() {},
+
+	getAccessCMSPayload: function() {
+
+		var payload = {
+			"id":"",
+			"userId":"",
+			"applicationId":"",
+			"contextId":"",
+			"userEUAId":"",
+			"lastUpdated":"",
+			"statuses": {
+				"userHHSId": "",
+				"securityReview": {
+					"status":"",
+					"reason": [
+						{
+							"field":"",
+							"reason": "",
+							"correction": "",
+							"sendto": ""
+						}
+					],
+				},
+				"fingerprints": {
+					"current": {
+						"status": ""
+					}
+				},
+				"eApp": {
+					"current": {
+						"status": ""
+					}
+				},
+				"logicalAccess": {
+					"current": {
+						"status": "",
+						"denyReasons": [
+							{
+								"field":"",
+								"reason": "",
+								"correction": "",
+								"sendto": ""
+							}
+						]
+					}
+				}
+			}
+		};
+
+		return payload;
+
+	},
+
+    type: 'VASUtil'
+};
