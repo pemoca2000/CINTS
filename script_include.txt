@@ -5,3 +5,170 @@ VASEncryptionUtil.prototype = {
 
     type: 'VASEncryptionUtil'
 };
+
+
+
+
+
+Update VASEncryptionUtil Script Include
+Paste this into your VASEncryptionUtil Script Include (same name you have now). It adds a public method you can call from VASUtil.
+
+var VASEncryptionUtil = Class.create();
+VASEncryptionUtil.prototype = {
+    initialize: function() {},
+
+    /**
+     * Returns decrypted plaintext for an encrypted field on a GlideRecord.
+     *
+     * IMPORTANT:
+     * - Do NOT log the returned value (DOB/SSN are sensitive).
+     * - If the field is Edge Encrypted (client-side), plaintext will not be recoverable.
+     *
+     * @param {GlideRecord} gr - record containing the encrypted field
+     * @param {String} fieldName - column name on the table (e.g. 'ssn', 'date_of_birth')
+     * @returns {String} plaintext value (or '' if unavailable)
+     */
+    getDecryptedValue: function(gr, fieldName) {
+        if (!gr || !fieldName) return '';
+        if (!gr.isValidField(fieldName)) return '';
+
+        var el = gr.getElement(fieldName);
+        if (!el) return '';
+
+        // Most server-side encrypted fields support getDecryptedValue()
+        if (typeof el.getDecryptedValue === 'function') {
+            return (el.getDecryptedValue() || '').toString();
+        }
+
+        // Fallback: sometimes display value returns plaintext for privileged roles
+        // (may return masked/ciphertext depending on encryption/ACLs)
+        return (gr.getDisplayValue(fieldName) || '').toString();
+    },
+
+    /**
+     * Optional helper: returns true if field appears decryptable via GlideElement API.
+     * Useful for debugging without revealing sensitive values.
+     */
+    canDecrypt: function(gr, fieldName) {
+        if (!gr || !fieldName || !gr.isValidField(fieldName)) return false;
+        var el = gr.getElement(fieldName);
+        return !!(el && typeof el.getDecryptedValue === 'function');
+    },
+
+    type: 'VASEncryptionUtil'
+};
+
+
+
+
+
+
+
+2) Update VASUtil to call VASEncryptionUtil from _buildSmsStdCreatePayload
+
+Right now you’re doing:
+
+DOB: getVal(applicantGR, 'date_of_birth') 
+
+latest_script_include
+
+SSN: temporarily random 9-digit number (testing) 
+
+latest_script_include
+
+Replace those two payload lines with calls into VASEncryptionUtil.
+
+In VASUtil._buildSmsStdCreatePayload, add this near the top (after helpers)
+
+        // Use encryption utility for encrypted columns (DOB + SSN)
+        var encUtil = new x_g_cfm_vas.VASEncryptionUtil();
+
+        // Get decrypted values (do NOT log these)
+        var dobPlain = encUtil.getDecryptedValue(applicantGR, 'date_of_birth');
+        var ssnPlain = encUtil.getDecryptedValue(applicantGR, 'ssn');
+
+
+
+
+
+Then update the payload mapping section
+
+Replace:
+
+'PersonParams.birthDate': getVal(applicantGR, 'date_of_birth'),
+'PersonParams.ssn': test_ssn,
+
+
+with:
+
+// birthDate and ssn are encrypted fields in SN; decrypt before sending to SM
+'PersonParams.birthDate': dobPlain,
+'PersonParams.ssn': ssnPlain,
+
+
+So you’ll end up with this in your return object:
+
+            'PersonParams.birthDate': dobPlain,
+            'PersonParams.ssn': ssnPlain,
+
+
+
+
+
+3) Very important: stop logging the full payload once SSN/DOB are real
+
+You currently log the full payload object as JSON. 
+
+latest_script_include
+
+
+That will leak SSN/DOB into system logs once you decrypt them.
+
+Replace this:
+
+gs.info('PMC***** [VASUtil.createSmPersonPositionCase] payload = ' + JSON.stringify(payload, null, 2));
+
+
+With something safe like:
+
+gs.info('PMC***** [VASUtil.createSmPersonPositionCase] payload keys = ' + Object.keys(payload).join(', '));
+gs.info('PMC***** [VASUtil.createSmPersonPositionCase] dob present=' + (!!payload['PersonParams.birthDate'])
+    + ' ssn present=' + (!!payload['PersonParams.ssn']));
+
+
+That keeps debugging value without exposing PHI/PII.
+
+
+
+
+
+
+4) If decryption “doesn’t work” (what you’ll see)
+
+If getDecryptedValue() returns:
+
+blank → script context/role doesn’t allow decrypt OR the field is not decryptable server-side
+
+ciphertext-looking long string → you’re still getting stored encrypted form; either decrypt isn’t available or you’re not allowed
+
+masked (like ***-**-1234) → likely ACL/display masking; may need different access
+
+Quick non-sensitive debug (safe):
+
+var encUtil = new x_g_cfm_vas.VASEncryptionUtil();
+gs.info('canDecrypt ssn=' + encUtil.canDecrypt(applicantGR, 'ssn')
+    + ' canDecrypt dob=' + encUtil.canDecrypt(applicantGR, 'date_of_birth'));
+
+5) One more note about dates
+
+Your payload example shows DOB formatted as YYYY-MM-DD already. 
+
+payload_generated
+
+
+If your decrypted DOB comes back as something else (like 07/16/1989), tell me what format you see (just the pattern, not the real date) and I’ll give you a tiny formatter.
+
+If you want, paste back only the “canDecrypt” booleans and whether the decrypted values come back blank/ciphertext/masked (no actual SSN/DOB), and I’ll tell you exactly what encryption mechanism you’re dealing with and what the next best approach is.
+
+
+
