@@ -1,0 +1,129 @@
+2) Update your Script Include to accept either sys_id or GR
+
+Right now your method signature expects a GlideRecord and immediately calls things like applicantGR.getUniqueValue(). 
+
+latest_script_include
+
+Update createSmPersonPositionCase so it can accept:
+
+a sys_id string (from async BR), OR
+
+a GlideRecord (if you ever call it from other server code)
+
+Replace only the top of createSmPersonPositionCase with this
+
+createSmPersonPositionCase: function(applicantInput) {
+    try {
+        gs.info('PMC***** VASUtil.createSmPersonPositionCase started...');
+
+        // ------------------------------------------------------------
+        // Normalize input to a real Applicant GlideRecord.
+        // In async BRs, it’s best to pass sys_id and re-query.
+        // ------------------------------------------------------------
+        var applicantGR = this._normalizeApplicant(applicantInput);
+        if (!applicantGR) {
+            gs.error("PMC***** [VASUtil.createSmPersonPositionCase] Unable to load applicant record.");
+            return { ok: false, error: "Applicant record not found." };
+        }
+
+        // OPTIONAL: stop if already processed
+        if (applicantGR.sm_person_handle) {
+            gs.info('PMC***** [VASUtil.createSmPersonPositionCase] Applicant already has person handle. Skipping.');
+            return { ok: true, skipped: true, reason: 'Applicant already has handle.' };
+        }
+
+        // 1) Find case related to this applicant
+        var caseGR = this._getCaseForApplicant(applicantGR);
+        if (!caseGR) {
+            gs.warn('PMC***** [VASUtil.createSmPersonPositionCase] For applicant '
+                + applicantGR.getUniqueValue()
+                + ' no related case was found or case already has SM handles.');
+            return { ok: false, error: 'No related case found.' };
+        }
+
+        gs.info('PMC***** case ' + caseGR.getUniqueValue() + ' found for applicant');
+
+        // ... keep the rest of your existing function EXACTLY the same ...
+
+
+
+
+
+
+
+
+
+Add this helper anywhere in the Script Include (below initialize is fine)
+
+/**
+ * Accepts either:
+ *  - applicant sys_id (string)
+ *  - applicant GlideRecord (x_g_cfm_vas_applicant)
+ * Returns a valid applicant GR or null.
+ */
+_normalizeApplicant: function(applicantInput) {
+    // If a GlideRecord was passed in
+    if (applicantInput && typeof applicantInput.getTableName === 'function') {
+        if (applicantInput.getTableName() === 'x_g_cfm_vas_applicant') {
+            return applicantInput;
+        }
+    }
+
+    // Otherwise assume it’s a sys_id string
+    var sysId = (applicantInput || '').toString();
+    if (!sysId) return null;
+
+    var a = new GlideRecord('x_g_cfm_vas_applicant');
+    if (a.get(sysId)) return a;
+
+    return null;
+},
+
+
+
+
+
+
+
+
+
+
+
+3) Keep your payload logging for now, but don’t log sensitive data later
+
+Your code logs the entire payload: 
+
+latest_script_include
+
+
+And you can see DOB and SSN in the printed payload. 
+
+payload_generated
+
+For now, fine for debugging, but once you re-enable real SSN/DOB, switch to something like:
+
+gs.info('PMC***** payload keys=' + Object.keys(payload).join(','));
+
+
+or log only non-sensitive fields.
+
+Do you “lose” current in Async BR?
+
+No. You still have current. What changes:
+
+previous is null
+
+the record is running outside the interactive transaction
+
+So your “changes” condition should be enforced by:
+
+the BR filter conditions (you already have them in the UI)
+
+and/or a guard field/flag (like sm_person_handle empty)
+
+Your BR already checks if (previous && previous.hhs_id) return; 
+
+BR_to_create_person_position_ca…
+
+
+In async, that check won’t do anything since previous is null. That’s why relying on your filter conditions + handle guard is the right approach.
