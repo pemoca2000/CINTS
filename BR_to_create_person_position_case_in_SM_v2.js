@@ -7,6 +7,8 @@
     // call Script Include to create Person/Position/Case in SM.
     // ============================================================
 
+    gs.info('PMC***** SM Create BR triggered...');
+
     // Only run if hhs_id is populated now
     if (!current.hhs_id) return;
 
@@ -16,7 +18,11 @@
     // Optional: avoid duplicate create if person handle already exists
     if (current.sm_person_handle) return;
 
+    //gs.info('PMC***** All 3 checks passed and about to call script include...');
+
     // Call existing Script Include (VASUtil)
-    new x_g_cfm_vas.VASUtil().createPersonPositionCaseFromApplicant(current);
+    new x_g_cfm_vas.VASUtil().createSmPersonPositionCase(current);
+
+    //gs.info('PMC***** Script include called now ending BR...');
 
 })(current, previous);
